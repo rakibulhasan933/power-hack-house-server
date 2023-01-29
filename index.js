@@ -37,6 +37,38 @@ async function run() {
 			const result = await cursor.toArray();
 			res.send(result);
 		});
+		// Bill Update
+		// app.patch('/update-billing/:id', async (req, res) => {
+		// 	const id = req.params.id;
+		// 	const bill = req.body;
+		// 	const filter = { _id: ObjectId(id) };
+		// 	
+		// 	const updateDoc = {
+		// 		$set: {
+		// 			name: bill.name,
+		// 			email: bill.email,
+		// 			phone: bill.phone,
+		// 			amount: bill.amount
+		// 		}
+		// 	};
+		// 	const result = await billCollection.updateOne(filter, updateDoc, options);
+		// 	res.json(result);
+		// })
+		app.put('/update-billing/:id', async (req, res) => {
+			const id = req.params.id;
+			const filter = { _id: ObjectId(id) };
+			const updateDoc = {
+				$set: {
+					name: req.body.name,
+					phone: req.body.phone,
+					email: req.body.email,
+					amount: req.body.amount
+				}
+			};
+			const result = await billCollection.updateMany(filter, updateDoc);
+			res.send(result);
+		})
+
 		// Bill delete
 		app.delete('/delete-billing/:id', async (req, res) => {
 			const id = req.params.id;
