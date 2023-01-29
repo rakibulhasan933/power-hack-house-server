@@ -23,13 +23,32 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
 	try {
 		const billCollection = client.db("power_house").collection("bill");
+		const UserCollection = client.db("power_house").collection("user");
 		console.log('Database Connected');
+
+		// User Register
+		app.post("/register", async (req, res) => {
+			const data = req.body;
+			const result = await UserCollection.insertOne(data);
+			res.send(result);
+		});
+		// User Login
+		app.post('/login', async (req, res) => {
+			const { email, password } = req.body;
+			const user = await UserCollection.findOne({ email: email });
+			if (user && user.password === password) {
+				res.status(200).json({ status: "valid users" });
+			}
+			else {
+				res.status(404).json({ status: "Not a valid users" });
+			}
+		});
 
 		// Created bill
 		app.post('/add-billing', async (req, res) => {
 			const data = req.body;
 			const result = await billCollection.insertOne(data);
-			res.send({ success: true, result });
+			res.send(result);
 		});
 		// ALL bill
 		app.get('/bill-list', async (req, res) => {
@@ -38,22 +57,6 @@ async function run() {
 			res.send(result);
 		});
 		// Bill Update
-		// app.patch('/update-billing/:id', async (req, res) => {
-		// 	const id = req.params.id;
-		// 	const bill = req.body;
-		// 	const filter = { _id: ObjectId(id) };
-		// 	
-		// 	const updateDoc = {
-		// 		$set: {
-		// 			name: bill.name,
-		// 			email: bill.email,
-		// 			phone: bill.phone,
-		// 			amount: bill.amount
-		// 		}
-		// 	};
-		// 	const result = await billCollection.updateOne(filter, updateDoc, options);
-		// 	res.json(result);
-		// })
 		app.put('/update-billing/:id', async (req, res) => {
 			const id = req.params.id;
 			const filter = { _id: ObjectId(id) };
