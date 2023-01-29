@@ -31,13 +31,19 @@ async function run() {
 			const result = await billCollection.insertOne(data);
 			res.send({ success: true, result });
 		});
-		// // Bill delete
-		// app.delete('/delete-billing/:id', async (req, res) => {
-		// 	const id = req.params.id;
-		// 	const query = { _id: ObjectId(id) };
-		// 	const result = await billCollection.deleteOne(query);
-		// 	res.send(result);
-		// });
+		// ALL bill
+		app.get('/bill-list', async (req, res) => {
+			const cursor = billCollection.find({});
+			const result = await cursor.toArray();
+			res.send(result);
+		});
+		// Bill delete
+		app.delete('/delete-billing/:id', async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: ObjectId(id) };
+			const result = await billCollection.deleteOne(query);
+			res.send(result);
+		});
 
 	} finally {
 		// await client.close();
