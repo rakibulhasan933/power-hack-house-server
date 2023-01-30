@@ -45,7 +45,7 @@ async function run() {
 		app.post("/register", async (req, res) => {
 			const data = req.body;
 			const result = await UserCollection.insertOne(data);
-			res.send(result);
+			res.send({ success: true });
 		});
 		// User Login
 		app.post('/login', async (req, res) => {
@@ -81,7 +81,7 @@ async function run() {
 		app.post('/add-billing', async (req, res) => {
 			const data = req.body;
 			const result = await billCollection.insertOne(data);
-			res.send(result);
+			res.send({ success: true });
 		});
 		// ALL bill
 		app.get('/bill-list', async (req, res) => {
