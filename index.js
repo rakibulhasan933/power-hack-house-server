@@ -3,6 +3,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const cors = require('cors');
 const ObjectId = require('mongodb').ObjectId;
 const dotenv = require('dotenv').config();
+const jwt = require('jsonwebtoken');
 
 
 
@@ -17,6 +18,20 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.t2kmaoa.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+// function verifyJWT(req, res, next) {
+// 	const authHeader = req.headers.authorization;
+// 	if (!authHeader) {
+// 		return res.status(401).send({ message: 'Unauthorized access' });
+// 	};
+// 	const token = authHeader.split(' ')[1];
+// 	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+// 		if (err) {
+// 			return res.status(403).send({ message: 'Forbidden access' })
+// 		}
+// 		req.decoded = decoded;
+// 		next();
+// 	});
+// }
 
 
 
@@ -36,13 +51,31 @@ async function run() {
 		app.post('/login', async (req, res) => {
 			const { email, password } = req.body;
 			const user = await UserCollection.findOne({ email: email });
-			if (user && user.password === password) {
-				res.status(200).json({ status: "valid users" });
+			if (!user) {
+				res.send({ success: false });
+			}
+			else if (user && user.password === password) {
+				const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+				res.send({ email, token });
 			}
 			else {
-				res.status(404).json({ status: "Not a valid users" });
+				res.send({ success: false });
 			}
 		});
+		// Search Keyword
+		app.get('/search/:key', async (req, res) => {
+			const key = req.params.key;
+			const query = {
+				$or: [
+					{ name: { $regex: key, $options: "i" } },
+					{ email: { $regex: key, $options: "i" } },
+					{ phone: { $regex: key, $options: "i" } }
+				]
+			};
+			const result = await billCollection.find(query).toArray();
+			res.send(result);
+
+		})
 
 		// Created bill
 		app.post('/add-billing', async (req, res) => {
